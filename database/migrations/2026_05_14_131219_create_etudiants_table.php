@@ -17,7 +17,9 @@ return new class extends Migration
     $table->string('nom');
     $table->string('prenom');
     $table->date('date_naissance')->nullable();
+    $table->string('email')->unique()->nullable();
     $table->string('telephone')->nullable();
+    $table->string('photo')->nullable();
     
     // Un étudiant appartient à une Filière (ex: GIT) et un Niveau (ex: L2)
     $table->foreignId('filiere_id')->constrained()->onDelete('cascade');

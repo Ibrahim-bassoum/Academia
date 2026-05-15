@@ -9,13 +9,18 @@ class Niveau extends Model
 {
     /** @use HasFactory<\Database\Factories\NiveauFactory> */
     use HasFactory;
-    public function filieres(){
-        return $this->belongsTo(Filiere::class);
-    }
+
+    protected $fillable = ['nom','filiere_id'];
+
+ 
     public function modules(){
         return $this->hasMany(Module::class);
     }
     public function etudiants(){
         return$this->hasMany(Etudiant::class);
     }
+     public function filiere(){
+        return $this->belongsTo(Filiere::class);
+    }
+
 }

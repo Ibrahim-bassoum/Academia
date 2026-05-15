@@ -7,10 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Paiement extends Model
 {
-    /** @use HasFactory<\Database\Factories\PaiementFactory> */
     use HasFactory;
 
-    public function etudiant(){
+    protected $fillable = [
+        'etudiant_id',
+        'montant',
+        'type_paiement',
+        'date_paiement',
+        'mode_paiement',
+        'recu_numero',
+    ];
+
+    // Relation avec l'étudiant
+    public function etudiant()
+    {
         return $this->belongsTo(Etudiant::class);
     }
 }

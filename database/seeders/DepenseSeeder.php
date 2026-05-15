@@ -4,15 +4,14 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Paiement;
-class PaiementSeeder extends Seeder
+
+class DepenseSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-       // Génère 50 paiements aléatoires
-        Paiement::factory()->count(50)->create();
+        //
     }
 }

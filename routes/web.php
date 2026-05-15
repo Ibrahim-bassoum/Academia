@@ -1,29 +1,42 @@
 <?php
 
+use App\Http\Controllers\Admissions\InscriptionController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Promoteur\DashboardController; // Importation du nouveau contrôleur
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\DashboardController; 
+use App\Http\Controllers\Promoteur\FinanceController;
 use Illuminate\Support\Facades\Route;
-use Database\Seeders\AcademiaSeeder;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Redirection intelligente du dashboard par défaut
-Route::get('/dashboard', function () {
-    /** @var \App\Models\User $user */
-    $user=Auth::user();
-    if ($user && $user->hasRole('promoteur')) {
-        return redirect()->route('promoteur.dashboard');
-    }
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// LE DASHBOARD CENTRAL
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 // --- SECTION ACADEMIA : PROMOTEUR ---
 Route::middleware(['auth', 'role:promoteur'])->prefix('promoteur')->group(function () {
-    // Route vers le dashboard stratégique
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('promoteur.dashboard');
+    Route::get('/dashboard-stats', [DashboardController::class, 'index'])->name('promoteur.dashboard');
+    Route::get('/finance', [FinanceController::class, 'index'])->name('promoteur.finance');
+});
+
+// --- SECTION ACADEMIA : ADMISSIONS (Scolarité) ---
+Route::middleware(['auth', 'role:scolarite|promoteur'])->prefix('admissions')->group(function () {
+    // Inscription (Création)
+    Route::get('/inscription', [InscriptionController::class, 'create'])->name('admissions.create');
+    Route::post('/inscription', [InscriptionController::class, 'store'])->name('admissions.store');
+    
+    // Registre (Liste)
+    Route::get('/liste', [InscriptionController::class, 'index'])->name('admissions.index');
+
+    // --- AJOUTS : MODIFICATION ET SUPPRESSION ---
+    // Affiche le formulaire de modification
+    Route::get('/etudiant/{etudiant}/edit', [InscriptionController::class, 'edit'])->name('admissions.edit');
+    // Enregistre les modifications (PUT ou PATCH)
+    Route::put('/etudiant/{etudiant}', [InscriptionController::class, 'update'])->name('admissions.update');
+    // Supprime l'étudiant
+    Route::delete('/etudiant/{etudiant}', [InscriptionController::class, 'destroy'])->name('admissions.destroy');
 });
 
 // --- SECTION PROFILS (Breeze) ---
