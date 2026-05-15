@@ -8,6 +8,8 @@ use App\Models\Etudiant;
 use App\Models\Filiere;
 use App\Models\Niveau;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class InscriptionController extends Controller
 {
@@ -45,10 +47,21 @@ class InscriptionController extends Controller
             'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $annee = date('Y');
-        $dernierEtudiant = Etudiant::whereYear('created_at', $annee)->count();
-        $numero = str_pad($dernierEtudiant + 1, 4, '0', STR_PAD_LEFT);
-        $matricule = "ADM-{$annee}-{$numero}";
+ $annee = date('Y');
+
+// On cherche le matricule le plus grand commencé par ADM-2026
+$dernier = \App\Models\Etudiant::where('matricule', 'LIKE', "ADM-{$annee}-%")
+    ->orderByRaw('CAST(SUBSTRING(matricule, -4) AS UNSIGNED) DESC')
+    ->first();
+
+if ($dernier) {
+    $dernierNumero = (int) substr($dernier->matricule, -4);
+    $prochainNumero = $dernierNumero + 1;
+} else {
+    $prochainNumero = 1;
+}
+
+$matricule = "ADM-{$annee}-" . str_pad($prochainNumero, 4, '0', STR_PAD_LEFT);
 
         $photoPath = null;
         if ($request->hasFile('photo')) {
@@ -134,4 +147,35 @@ class InscriptionController extends Controller
         return redirect()->back()
             ->with('success', "L'étudiant a été retiré du registre.");
     }
+
+// 1. Affiche l'interface avec la carte et le bouton de téléchargement
+public function viewCard(Etudiant $etudiant)
+{
+    return view('admissions.show_card', compact('etudiant'));
+}
+
+// 2. Génère le PDF pour l'affichage dans l'iframe
+public function streamCard(Etudiant $etudiant)
+{
+    // On charge la vue de la carte
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admissions.card_pdf', compact('etudiant'));
+    
+    // On configure la taille de la carte
+    $pdf->setPaper([0, 0, 242.65, 153], 'portrait');
+    
+    // On récupère le contenu brut du PDF généré
+    $content = $pdf->output();
+
+    // On renvoie une réponse HTTP propre pour l'iframe avec le statut 200
+    return response($content, 200)
+        ->header('Content-Type', 'application/pdf')
+        ->header('Content-Disposition', 'inline; filename="carte.pdf"');
+}
+
+// 3. Action de téléchargement forcé
+public function downloadCard(Etudiant $etudiant)
+{
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admissions.card_pdf', compact('etudiant'));
+    return $pdf->setPaper([0, 0, 242.65, 153], 'portrait')->download("Carte_{$etudiant->matricule}.pdf");
+}
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admissions\InscriptionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController; 
 use App\Http\Controllers\Promoteur\FinanceController;
+use App\Models\Etudiant;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -37,6 +38,16 @@ Route::middleware(['auth', 'role:scolarite|promoteur'])->prefix('admissions')->g
     Route::put('/etudiant/{etudiant}', [InscriptionController::class, 'update'])->name('admissions.update');
     // Supprime l'étudiant
     Route::delete('/etudiant/{etudiant}', [InscriptionController::class, 'destroy'])->name('admissions.destroy');
+    
+    // --- GESTION DE LA CARTE ÉTUDIANT (SÉPARÉE) ---
+    // 1. Page HTML globale pour voir la carte et avoir le bouton de téléchargement
+    Route::get('/etudiant/{etudiant}/view-card', [InscriptionController::class, 'viewCard'])->name('admissions.card.view');
+    
+    // 2. Flux brut du PDF (utilisé à l'intérieur de l'iframe de la page d'aperçu)
+    Route::get('/etudiant/{etudiant}/stream-card', [InscriptionController::class, 'streamCard'])->name('admissions.card.stream');
+    
+    // 3. Action de téléchargement forcé (appelé par le bouton de téléchargement)
+    Route::get('/etudiant/{etudiant}/download-card', [InscriptionController::class, 'downloadCard'])->name('admissions.card.download');
 });
 
 // --- SECTION PROFILS (Breeze) ---
