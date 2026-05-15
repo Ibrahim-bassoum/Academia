@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->string('credit')->default(0);
             //Relation 
+            $table->foreignId('filiere_id')->constrained()->onDelete('cascade');
             $table->foreignId('niveau_id')->constrained()->onDelete('cascade');
-            
             $table->timestamps();
         });
     }

@@ -10,14 +10,14 @@ class Suivi extends Model
     /** @use HasFactory<\Database\Factories\SuiviFactory> */
     use HasFactory;
         
-
-    protected $fillable = ['etudiant_id', 'matiere_id', 'date_cours', 'statut', 'est_justifie', 'commentaire'];
+    protected $table ='suivi_presences';
+    protected $fillable = ['etudiant_id', 'module_id', 'date_cours', 'statut', 'est_justifie', 'commentaire'];
 
     public function etudiant() {
         return $this->belongsTo(Etudiant::class);
     }
 
-    public function matiere() {
+    public function module() {
         return $this->belongsTo(Module::class);
     }
 }

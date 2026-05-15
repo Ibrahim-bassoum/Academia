@@ -18,7 +18,12 @@ class ModuleFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+                  'nom' => $this->faker->randomElement([
+            'Algorithmique', 'Base de Données', 'Laravel', 'Réseaux IP', 'Java Swing', 'Anglais Technique'
+        ]),
+        'code' => strtoupper($this->faker->unique()->bothify('??###')), // ex: IF302
+        'filiere_id' => \App\Models\Filiere::factory(),
+        'niveau_id' => \App\Models\Niveau::factory(),
         ];
     }
 }

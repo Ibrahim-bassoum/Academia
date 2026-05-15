@@ -9,13 +9,13 @@ class Note extends Model
 {
     /** @use HasFactory<\Database\Factories\NoteFactory> */
     use HasFactory;
-      protected $fillable = ['etudiant_id', 'matiere_id', 'valeur', 'type', 'coefficient'];
+      protected $fillable = ['etudiant_id', 'module_id', 'valeur', 'type', 'coefficient'];
 
     public function etudiant() {
         return $this->belongsTo(Etudiant::class);
     }
 
-    public function matiere() {
+    public function modules() {
         return $this->belongsTo(Module::class);
     }
 }

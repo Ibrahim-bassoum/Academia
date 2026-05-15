@@ -15,10 +15,21 @@ class FiliereFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
-    {
-        return [
-            //
-        ];
-    }
+  public function definition(): array
+{
+    $nom = $this->faker->randomElement([
+        'Génie Informatique et Télécommunications', 
+        'Management des Entreprises', 
+        'Réseaux et Sécurité',
+        'Comptabilité'
+    ]);
+
+    // On génère un code court basé sur le nom (ex: GIT, MAN, RES, COM)
+    $code = strtoupper(substr($nom, 0, 3)); 
+
+    return [
+        'nom' => $nom,
+        'code' => $code, 
+    ];
+}
 }

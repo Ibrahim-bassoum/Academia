@@ -14,7 +14,7 @@ return new class extends Migration
        Schema::create('notes', function (Blueprint $table) {
     $table->id();
     // Clés étrangères
-    $table->foreignId('etudiant_id')->constrained()->onDelete('cascade');
+    $table->foreignId('etudiant_id')->constrained('etudiants')->onDelete('cascade');
     $table->foreignId('module_id')->constrained()->onDelete('cascade');
     
     // Données de la note

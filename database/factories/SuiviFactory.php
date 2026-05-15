@@ -18,7 +18,11 @@ class SuiviFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+                    'etudiant_id' => \App\Models\Etudiant::factory(),
+        'module_id' => \App\Models\Module::factory(),
+        'date_cours' => $this->faker->dateTimeBetween('-1 month', 'now'),
+        'statut' => $this->faker->randomElement(['present', 'absent', 'retard']),
+        'est_justifie' => false,
         ];
     }
 }

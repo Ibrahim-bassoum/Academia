@@ -18,7 +18,11 @@ class NoteFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+             //'etudiant_id' => \App\Models\Etudiant::factory(),
+        'module_id' => \App\Models\Module::factory(),
+        'valeur' => $this->faker->randomFloat(2, 5, 18), // Des notes entre 5 et 18
+        'type' => $this->faker->randomElement(['devoir', 'examen', 'rattrapage']),
+        'coefficient' => $this->faker->numberBetween(1, 4)
         ];
     }
 }

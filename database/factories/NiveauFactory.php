@@ -18,7 +18,8 @@ class NiveauFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+                    'nom' => $this->faker->randomElement(['Licence 1', 'Licence 2', 'Licence 3']),
+        'filiere_id' => \App\Models\Filiere::factory(),
         ];
     }
 }
