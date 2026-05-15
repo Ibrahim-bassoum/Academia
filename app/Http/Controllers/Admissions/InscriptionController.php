@@ -10,7 +10,6 @@ use App\Models\Niveau;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 
-
 class InscriptionController extends Controller
 {
     public function create()
@@ -47,27 +46,28 @@ class InscriptionController extends Controller
             'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
- $annee = date('Y');
+        $annee = date('Y');
 
-// On cherche le matricule le plus grand commencé par ADM-2026
-$dernier = \App\Models\Etudiant::where('matricule', 'LIKE', "ADM-{$annee}-%")
-    ->orderByRaw('CAST(SUBSTRING(matricule, -4) AS UNSIGNED) DESC')
-    ->first();
+        // On cherche le matricule le plus grand commencé par ADM-2026
+        $dernier = Etudiant::where('matricule', 'LIKE', "ADM-{$annee}-%")
+            ->orderByRaw('CAST(SUBSTRING(matricule, -4) AS UNSIGNED) DESC')
+            ->first();
 
-if ($dernier) {
-    $dernierNumero = (int) substr($dernier->matricule, -4);
-    $prochainNumero = $dernierNumero + 1;
-} else {
-    $prochainNumero = 1;
-}
+        if ($dernier) {
+            $dernierNumero = (int) substr($dernier->matricule, -4);
+            $prochainNumero = $dernierNumero + 1;
+        } else {
+            $prochainNumero = 1;
+        }
 
-$matricule = "ADM-{$annee}-" . str_pad($prochainNumero, 4, '0', STR_PAD_LEFT);
+        $matricule = "ADM-{$annee}-" . str_pad($prochainNumero, 4, '0', STR_PAD_LEFT);
 
         $photoPath = null;
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('etudiants/photos', 'public');
         }
 
+        // Création de l'étudiant bloqué par défaut pour la comptabilité
         $etudiant = Etudiant::create([
             'matricule' => $matricule,
             'nom' => strtoupper($request->nom),
@@ -78,14 +78,12 @@ $matricule = "ADM-{$annee}-" . str_pad($prochainNumero, 4, '0', STR_PAD_LEFT);
             'filiere_id' => $request->filiere_id,
             'niveau_id' => $request->niveau_id,
             'photo' => $photoPath,
-            'statut' => 'actif'
+            'statut' => 'EN ATTENTE' // Modification ici
         ]);
 
         return redirect()->route('admissions.index')
-            ->with('success', "L'étudiant {$etudiant->prenom} {$etudiant->nom} a été inscrit avec succès.");
+            ->with('success', "L'étudiant {$etudiant->prenom} {$etudiant->nom} a été inscrit avec succès et envoyé à la comptabilité.");
     }
-
-    // --- NOUVELLES MÉTHODES AJOUTÉES ---
 
     /**
      * Affiche le formulaire de modification
@@ -94,8 +92,6 @@ $matricule = "ADM-{$annee}-" . str_pad($prochainNumero, 4, '0', STR_PAD_LEFT);
     {
         $filieres = Filiere::all();
         $niveaux = Niveau::with('filiere')->get();
-        
-        // On retourne une vue spécifique pour l'édition (ex: admissions.edit)
         return view('admissions.edit', compact('etudiant', 'filieres', 'niveaux'));
     }
 
@@ -116,7 +112,6 @@ $matricule = "ADM-{$annee}-" . str_pad($prochainNumero, 4, '0', STR_PAD_LEFT);
         ]);
 
         if ($request->hasFile('photo')) {
-            // Supprimer l'ancienne photo du stockage si elle existe
             if ($etudiant->photo) {
                 Storage::disk('public')->delete($etudiant->photo);
             }
@@ -137,7 +132,6 @@ $matricule = "ADM-{$annee}-" . str_pad($prochainNumero, 4, '0', STR_PAD_LEFT);
      */
     public function destroy(Etudiant $etudiant)
     {
-        // Supprimer la photo physiquement avant de supprimer la ligne en BDD
         if ($etudiant->photo) {
             Storage::disk('public')->delete($etudiant->photo);
         }
@@ -148,34 +142,34 @@ $matricule = "ADM-{$annee}-" . str_pad($prochainNumero, 4, '0', STR_PAD_LEFT);
             ->with('success', "L'étudiant a été retiré du registre.");
     }
 
-// 1. Affiche l'interface avec la carte et le bouton de téléchargement
-public function viewCard(Etudiant $etudiant)
-{
-    return view('admissions.show_card', compact('etudiant'));
-}
+    /**
+     * 1. Affiche l'interface HTML globale pour voir la carte
+     */
+    public function viewCard(Etudiant $etudiant)
+    {
+        return view('admissions.show_card', compact('etudiant'));
+    }
 
-// 2. Génère le PDF pour l'affichage dans l'iframe
-public function streamCard(Etudiant $etudiant)
-{
-    // On charge la vue de la carte
-    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admissions.card_pdf', compact('etudiant'));
-    
-    // On configure la taille de la carte
-    $pdf->setPaper([0, 0, 242.65, 153], 'portrait');
-    
-    // On récupère le contenu brut du PDF généré
-    $content = $pdf->output();
+    /**
+     * 2. Génère le flux PDF pour l'affichage de l'iframe (Paysage)
+     */
+    public function streamCard(Etudiant $etudiant)
+    {
+        $pdf = Pdf::loadView('admissions.card_pdf', compact('etudiant'));
+        
+        // Correction ici : On utilise 'landscape' pour correspondre au format carte
+        return $pdf->setPaper([0, 0, 242.65, 153], 'landscape')
+                   ->stream("Carte_{$etudiant->matricule}.pdf", ['Attachment' => false]);
+    }
 
-    // On renvoie une réponse HTTP propre pour l'iframe avec le statut 200
-    return response($content, 200)
-        ->header('Content-Type', 'application/pdf')
-        ->header('Content-Disposition', 'inline; filename="carte.pdf"');
-}
-
-// 3. Action de téléchargement forcé
-public function downloadCard(Etudiant $etudiant)
-{
-    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admissions.card_pdf', compact('etudiant'));
-    return $pdf->setPaper([0, 0, 242.65, 153], 'portrait')->download("Carte_{$etudiant->matricule}.pdf");
-}
+    /**
+     * 3. Action de téléchargement forcé
+     */
+    public function downloadCard(Etudiant $etudiant)
+    {
+        $pdf = Pdf::loadView('admissions.card_pdf', compact('etudiant'));
+        
+        return $pdf->setPaper([0, 0, 242.65, 153], 'landscape')
+                   ->download("Carte_{$etudiant->matricule}.pdf");
+    }
 }

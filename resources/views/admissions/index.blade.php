@@ -75,11 +75,19 @@
                             <i class="fas fa-envelope mr-2 text-gray-300"></i> {{ $etudiant->email ?? '-' }}
                         </div>
                     </td>
+                    
                     <td class="px-6 py-4">
-                        <span class="px-2 py-1 text-[9px] font-bold bg-green-100 text-green-600 rounded-full uppercase tracking-tighter">
-                            {{ $etudiant->statut ?? 'ACTIF' }}
-                        </span>
+                        @if(strtoupper($etudiant->statut) === 'ACTIF')
+                            <span class="px-2 py-1 text-[9px] font-bold bg-green-100 text-green-600 rounded-full uppercase tracking-tighter">
+                                ACTIF
+                            </span>
+                        @else
+                            <span class="px-2 py-1 text-[9px] font-bold bg-yellow-100 text-yellow-600 rounded-full uppercase tracking-tighter">
+                                EN ATTENTE
+                            </span>
+                        @endif
                     </td>
+                    
                     <td class="px-6 py-4 text-center">
                         <div class="flex justify-center gap-2">
                             <a href="{{ route('admissions.card.view', $etudiant->id) }}" 
