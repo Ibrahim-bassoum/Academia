@@ -22,5 +22,8 @@ class Niveau extends Model
      public function filiere(){
         return $this->belongsTo(Filiere::class);
     }
+      public function tarif(){
+        return $this->hasOne(Filiere::class);
+    }
 
 }

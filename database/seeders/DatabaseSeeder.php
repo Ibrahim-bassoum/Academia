@@ -3,9 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Database\Seeders\AcademiaSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Database\Seeders\PaiementSeeder;
 use Spatie\Permission\Models\Role;
 use App\Models\User;
 
@@ -15,64 +13,33 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        // ÉTAPE 0 : Création des rôles supplémentaires
+        // ÉTAPE 0 : Création des rôles de sécurité
         if (!Role::where('name', 'scolarite')->exists()) {
             Role::create(['name' => 'scolarite']);
         }
 
-        // ÉTAPE 1 : Configuration de base (Rôles existants, Admin, etc.)
+        // ÉTAPE 1 : Configuration initiale du compte Administrateur
         $this->call([
             AcademiaSeeder::class,
         ]);
 
-        // OPTIONNEL : Assigner le rôle scolarité à l'admin pour tes tests
+        // Assigner le rôle scolarité à l'admin pour tes accès
         $admin = User::first();
         if ($admin) {
             $admin->assignRole('scolarite');
         }
 
-        // ÉTAPE 2 : Création de la structure académique
-        $filieres = \App\Models\Filiere::factory(3)->create();
+        // ÉTAPE 2 : Structure Académique Centrale (Filières, Niveaux globale, 40 Étudiants par filière)
+        $this->call([
+            StructureAcademiqueSeeder::class,
+        ]);
 
-        foreach ($filieres as $filiere) {
-            $niveaux = \App\Models\Niveau::factory(3)->create(['filiere_id' => $filiere->id]);
+        // ÉTAPE 3 : Tarification (Une fois que les niveaux existent)
+        $this->call([
+            TarifSeeder::class,
+        ]);
 
-            foreach ($niveaux as $niveau) {
-                $modules = \App\Models\Module::factory(5)->create([
-                    'filiere_id' => $filiere->id,
-                    'niveau_id' => $niveau->id
-                ]);
-
-                $etudiants = \App\Models\Etudiant::factory(10)->create([
-                    'filiere_id' => $filiere->id,
-                    'niveau_id' => $niveau->id
-                ]);
-
-                // ÉTAPE 3 : Notes et Suivis
-                foreach ($etudiants as $etudiant) {
-                    foreach ($modules as $module) {
-                        \App\Models\Note::factory()->create([
-                            'etudiant_id' => $etudiant->id,
-                            'module_id'   => $module->id,
-                            'type'        => 'devoir'
-                        ]);
-                        
-                        \App\Models\Note::factory()->create([
-                            'etudiant_id' => $etudiant->id,
-                            'module_id'   => $module->id,
-                            'type'        => 'examen'
-                        ]);
-
-                        \App\Models\Suivi::factory(2)->create([
-                            'etudiant_id' => $etudiant->id,
-                            'module_id'   => $module->id
-                        ]);
-                    }
-                }
-            }
-        }
-
-        // ÉTAPE 4 : Finances
+        // ÉTAPE 4 : Données financières et simulations de transactions
         \App\Models\Depense::factory(15)->create();
         
         $this->call([

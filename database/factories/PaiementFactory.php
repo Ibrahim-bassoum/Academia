@@ -11,7 +11,7 @@ class PaiementFactory extends Factory
     {
         return [
             // On prend un étudiant au hasard parmi ceux existants
-            'etudiant_id' => Etudiant::pluck('id')->random(), 
+            'etudiant_id' => Etudiant::inRandomOrder()->first()?->id ?? Etudiant::factory(), 
             'montant' => $this->faker->randomElement([25000, 50000, 100000, 150000]),
             'type_paiement' => $this->faker->randomElement(['Inscription', 'Scolarité', 'Examen']),
             'date_paiement' => $this->faker->dateTimeBetween('-2 months', 'now'),

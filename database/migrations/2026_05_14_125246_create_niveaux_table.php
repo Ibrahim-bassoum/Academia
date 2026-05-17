@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('niveaux', function (Blueprint $table) {
             $table->id();
-            $table->string('nom');
-            $table->foreignId('filiere_id')->constrained()->onDelete('cascade');
+            $table->string('nom'); // "Licence 1", "Licence 2", etc.
+            // La colonne filiere_id a été supprimée d'ici pour rendre les niveaux globaux
             $table->timestamps();
         });
     }

@@ -18,8 +18,8 @@ return new class extends Migration
     $table->decimal('montant', 10, 2); // Le montant versé
     $table->string('type_paiement'); // ex: Inscription, Scolarité, Examen
     $table->date('date_paiement');
-    $table->string('mode_paiement'); // ex: Espèces, Virement, Mobile Money
-    $table->string('recu_numero')->unique(); // Pour la comptabilité
+    $table->string('mode_paiement')->nullable(); // ex: Espèces, Virement, Mobile Money
+    $table->string('recu_numero')->unique()->nullable(); // Pour la comptabilité
     
     $table->timestamps();
         });

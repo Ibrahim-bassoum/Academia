@@ -40,31 +40,31 @@
                     <div class="grid grid-cols-2 gap-5">
                         <div class="col-span-1">
                             <label class="block text-sm font-bold text-gray-700 mb-1">Nom <span class="text-red-500">*</span></label>
-                            <input type="text" name="nom" required 
+                            <input type="text" name="nom" required value="{{ old('nom') }}"
                                    class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 rounded-xl text-gray-900 focus:border-indigo-600 focus:bg-white focus:ring-0 transition-all placeholder-gray-400" 
                                    placeholder="Ex: TRAORE">
                         </div>
                         <div class="col-span-1">
                             <label class="block text-sm font-bold text-gray-700 mb-1">Prénom <span class="text-red-500">*</span></label>
-                            <input type="text" name="prenom" required 
+                            <input type="text" name="prenom" required value="{{ old('prenom') }}"
                                    class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 rounded-xl text-gray-900 focus:border-indigo-600 focus:bg-white focus:ring-0 transition-all placeholder-gray-400" 
                                    placeholder="Ex: Moussa">
                         </div>
                         <div class="col-span-2">
                             <label class="block text-sm font-bold text-gray-700 mb-1">Email (Optionnel)</label>
-                            <input type="email" name="email" 
+                            <input type="email" name="email" value="{{ old('email') }}"
                                    class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 rounded-xl text-gray-900 focus:border-indigo-600 focus:bg-white focus:ring-0 transition-all placeholder-gray-400" 
                                    placeholder="etudiant@exemple.com">
                         </div>
                         <div class="col-span-1">
                             <label class="block text-sm font-bold text-gray-700 mb-1">Téléphone <span class="text-red-500">*</span></label>
-                            <input type="text" name="telephone" required 
+                            <input type="text" name="telephone" required value="{{ old('telephone') }}"
                                    class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 rounded-xl text-gray-900 focus:border-indigo-600 focus:bg-white focus:ring-0 transition-all placeholder-gray-400" 
                                    placeholder="+223 ...">
                         </div>
                         <div class="col-span-1">
                             <label class="block text-sm font-bold text-gray-700 mb-1">Date de Naissance <span class="text-red-500">*</span></label>
-                            <input type="date" name="date_naissance" required 
+                            <input type="date" name="date_naissance" required value="{{ old('date_naissance') }}"
                                    class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 rounded-xl text-gray-900 focus:border-indigo-600 focus:bg-white focus:ring-0 transition-all">
                         </div>
                     </div>
@@ -81,7 +81,9 @@
                                     class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 rounded-xl text-gray-900 focus:border-indigo-600 focus:bg-white focus:ring-0 transition-all cursor-pointer">
                                 <option value="">Sélectionner une filière</option>
                                 @foreach($filieres as $filiere)
-                                    <option value="{{ $filiere->id }}">{{ $filiere->nom }}</option>
+                                    <option value="{{ $filiere->id }}" {{ old('filiere_id') == $filiere->id ? 'selected' : '' }}>
+                                        {{ $filiere->nom }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -90,8 +92,11 @@
                             <select name="niveau_id" required 
                                     class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 rounded-xl text-gray-900 focus:border-indigo-600 focus:bg-white focus:ring-0 transition-all cursor-pointer">
                                 <option value="">Sélectionner un niveau</option>
+                                {{-- Affichage épuré et neutre : juste Licence 1, Licence 2, etc. --}}
                                 @foreach($niveaux as $niveau)
-                                    <option value="{{ $niveau->id }}">{{ $niveau->nom }} ({{ $niveau->filiere->nom ?? '' }})</option>
+                                    <option value="{{ $niveau->id }}" {{ old('niveau_id') == $niveau->id ? 'selected' : '' }}>
+                                        {{ $niveau->nom }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>

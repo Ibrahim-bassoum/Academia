@@ -59,6 +59,12 @@ class DashboardController extends Controller
             return view('admissions.dashboard', compact('stats'));
         }
 
+
+    // 1. Si c'est le comptable, on ne charge aucune vue Dashboard : on le redirige directement !
+        if ($user->hasRole('comptable')) {
+        return redirect()->to('finance/suivi');
+         }
+
         // Vue par défaut si aucun rôle ne correspond
         return view('dashboard');
     }

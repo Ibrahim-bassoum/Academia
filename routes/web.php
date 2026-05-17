@@ -3,9 +3,12 @@
 use App\Http\Controllers\Admissions\InscriptionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController; 
-use App\Http\Controllers\Promoteur\FinanceController;
 use App\Models\Etudiant;
 use Illuminate\Support\Facades\Route;
+
+// Importation des deux contrôleurs de finance avec des alias distincts
+use App\Http\Controllers\Promoteur\FinanceController as PromoteurFinanceController;
+use App\Http\Controllers\Finance\FinanceController as ComptableFinanceController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -19,7 +22,8 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 // --- SECTION ACADEMIA : PROMOTEUR ---
 Route::middleware(['auth', 'role:promoteur'])->prefix('promoteur')->group(function () {
     Route::get('/dashboard-stats', [DashboardController::class, 'index'])->name('promoteur.dashboard');
-    Route::get('/finance', [FinanceController::class, 'index'])->name('promoteur.finance');
+    // Utilise le contrôleur du dossier Promoteur
+    Route::get('/finance', [PromoteurFinanceController::class, 'index'])->name('promoteur.finance');
 });
 
 // --- SECTION ACADEMIA : ADMISSIONS (Scolarité) ---
@@ -32,22 +36,26 @@ Route::middleware(['auth', 'role:scolarite|promoteur'])->prefix('admissions')->g
     Route::get('/liste', [InscriptionController::class, 'index'])->name('admissions.index');
 
     // --- AJOUTS : MODIFICATION ET SUPPRESSION ---
-    // Affiche le formulaire de modification
     Route::get('/etudiant/{etudiant}/edit', [InscriptionController::class, 'edit'])->name('admissions.edit');
-    // Enregistre les modifications (PUT ou PATCH)
     Route::put('/etudiant/{etudiant}', [InscriptionController::class, 'update'])->name('admissions.update');
-    // Supprime l'étudiant
     Route::delete('/etudiant/{etudiant}', [InscriptionController::class, 'destroy'])->name('admissions.destroy');
     
-    // --- GESTION DE LA CARTE ÉTUDIANT (SÉPARÉE) ---
-    // 1. Page HTML globale pour voir la carte et avoir le bouton de téléchargement
+    // --- GESTION DE LA CARTE ÉTUDIANT ---
     Route::get('/etudiant/{etudiant}/view-card', [InscriptionController::class, 'viewCard'])->name('admissions.card.view');
-    
-    // 2. Flux brut du PDF (utilisé à l'intérieur de l'iframe de la page d'aperçu)
     Route::get('/etudiant/{etudiant}/stream-card', [InscriptionController::class, 'streamCard'])->name('admissions.card.stream');
-    
-    // 3. Action de téléchargement forcé (appelé par le bouton de téléchargement)
     Route::get('/etudiant/{etudiant}/download-card', [InscriptionController::class, 'downloadCard'])->name('admissions.card.download');
+});
+
+// --- SECTION ACADEMIA : COMPTABILITÉ (Nouveau bloc) ---
+Route::middleware(['auth', 'role:comptable|promoteur'])->prefix('finance')->group(function () {
+    // Tableau de bord comptable (Liste des étudiants) -> Utilise le contrôleur du dossier Finance
+    Route::get('/suivi', [ComptableFinanceController::class, 'index'])->name('finance.index');
+    
+    // Fiche financière individuelle (Formulaire + Historique)
+    Route::get('/etudiant/{id}', [ComptableFinanceController::class, 'etudiant'])->name('finance.etudiant');
+    
+    // Traitement de l'encaissement (Validation du paiement)
+    Route::post('/etudiant/{id}/payer', [ComptableFinanceController::class, 'payer'])->name('finance.payer');
 });
 
 // --- SECTION PROFILS (Breeze) ---

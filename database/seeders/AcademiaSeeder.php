@@ -47,7 +47,18 @@ class AcademiaSeeder extends Seeder
         );
         $userPromoteur->assignRole($promoteur);
 
-        // 5. Création d'un Étudiant de test
+        // 5. Création du Comptable
+        $userPromoteur = User::firstOrCreate(
+            ['email' => 'comptable@unilink.com'],
+            [
+                'name' => 'Le comptable',
+                'password' => bcrypt('password'),
+                'user_type' => 'staff',
+            ]
+        );
+        $userPromoteur->assignRole($compta);
+
+        // 6. Création d'un Étudiant de test
         $userStudent = User::firstOrCreate(
             ['email' => 'student@unilink.com'],
             [

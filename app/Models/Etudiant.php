@@ -9,7 +9,7 @@ class Etudiant extends Model
 {
     /** @use HasFactory<\Database\Factories\EtudiantFactory> */
     use HasFactory;
-    protected $fillable = ['matricule', 'nom', 'prenom', 'date_naissance', 'telephone', 'email', 'filiere_id', 'niveau_id', 'user_id','photo'];
+    protected $fillable = ['matricule', 'nom', 'prenom', 'date_naissance', 'telephone', 'email', 'statut', 'filiere_id', 'niveau_id', 'user_id','photo'];
     public function niveau(){
         return $this->belongsTo(Niveau::class);
     }
